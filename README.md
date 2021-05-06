@@ -5,7 +5,7 @@ A map created using NOAA Wavewatch III Model data and python.
 Packages installed:
 
 folium
-iris
+xarray
 matplotlib
 geojsoncontour
 cartopy
