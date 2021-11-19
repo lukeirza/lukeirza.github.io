@@ -85,8 +85,8 @@ region = regions_list[0]
 gfs_url = mt.gfswave_region_url(present_date, runtime, region)
 ds = xr.open_dataset(gfs_url)
 
-sw_dir = ds.dirpwsfc[::4,::12,::12]
-sw_ht = ds.htsgwsfc[::4, :, :]
+sw_dir = ds.dirpwsfc[:56:4,::16,::16]
+sw_ht = ds.htsgwsfc[:56:4, :, :]
 
 lat_min = min(sw_dir.coords['lat'].values)
 lat_max = max(sw_dir.coords['lat'].values)
@@ -99,11 +99,11 @@ features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.5,
 
 #intitate the map
 print('Generating Map...')
-wavemap = folium.Map(location=[32, -117], zoom_start=7, min_zoom = 2, worldCopyJump = True)
+wavemap = folium.Map(location=[0, 0], zoom_start=4, min_zoom = 2, worldCopyJump = True)
 #create a legend
 step = mt.step_legend(color_pallette, levels, 0, 45, 'Significant Height of Swell and Wind Waves (ft)')
 #create a timestamped geojson object
-time_geojson = plugins.TimestampedGeoJson({'type': 'FeatureCollection','features': features}, period='PT3H', transition_time = 750, time_slider_drag_update = True, duration = 'PT2H', auto_play=False, add_last_point = False)
+time_geojson = plugins.TimestampedGeoJson({'type': 'FeatureCollection','features': features}, period='PT12H', transition_time = 750, time_slider_drag_update = True, duration = 'PT11H', auto_play=False, add_last_point = False)
 
 #socal_bbox = folium.features.GeoJson(data = mt.geojson_box(-120.5, -116.5, 31.5, 34.0, "<p><a href='NOAA_GFS_wave_model_data_vis_glo25_1.html'>Southern California</a></p>"), zoom_on_click =False, highlight_function=highlight_funct, style_function = style_funct, popup = folium.features.GeoJsonPopup(fields = ['popup'], labels = False))
 
@@ -114,6 +114,38 @@ wavemap.add_child(time_geojson)
 
 
 wavemap.save('NOAA_GFS_wave_model_data_vis_'+region+'.html')
+
+
+#Export glo25 full_detail:
+sw_dir = ds.dirpwsfc[:1:,::4,::4]
+sw_ht = ds.htsgwsfc[:1:, :, :]
+
+lat_min = min(sw_dir.coords['lat'].values)
+lat_max = max(sw_dir.coords['lat'].values)
+lon_min = min(sw_dir.coords['lon'].values)
+lon_max = max(sw_dir.coords['lon'].values)
+
+print(lat_min, lat_max, lon_min, lon_max)
+
+features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.5, levels=levels, color_pallette=color_pallette, central_lon=0)
+
+#intitate the map
+print('Generating Map...')
+wavemap = folium.Map(location=[0, 0], zoom_start=4, min_zoom = 2, worldCopyJump = True)
+#create a legend
+step = mt.step_legend(color_pallette, levels, 0, 45, 'Significant Height of Swell and Wind Waves (ft)')
+#create a timestamped geojson object
+time_geojson = plugins.TimestampedGeoJson({'type': 'FeatureCollection','features': features}, period='PT12H', transition_time = 750, time_slider_drag_update = True, duration = 'PT11H', auto_play=False, add_last_point = False)
+
+#socal_bbox = folium.features.GeoJson(data = mt.geojson_box(-120.5, -116.5, 31.5, 34.0, "<p><a href='NOAA_GFS_wave_model_data_vis_glo25_1.html'>Southern California</a></p>"), zoom_on_click =False, highlight_function=highlight_funct, style_function = style_funct, popup = folium.features.GeoJsonPopup(fields = ['popup'], labels = False))
+
+wavemap.add_child(step)
+wavemap.add_child(time_geojson)
+#wavemap.add_child(socal_bbox)
+
+
+
+wavemap.save('NOAA_GFS_wave_model_data_vis_detail_demo_'+region+'.html')
 
 #Export wcoast:
 region = regions_list[3]
@@ -131,11 +163,11 @@ lon_max = max(sw_dir.coords['lon'].values)
 
 print(lat_min, lat_max, lon_min, lon_max)
 
-features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.16, levels=levels, color_pallette=color_pallette, central_lon=0)
+features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.25, levels=levels, color_pallette=color_pallette, central_lon=0)
 
 #intitate the map
 print('Generating Map...')
-wavemap = folium.Map(location=[32, -117], zoom_start=7, min_zoom = 2, worldCopyJump = True)
+wavemap = folium.Map(location=[36, -122], zoom_start=6, min_zoom = 2, worldCopyJump = True)
 #create a legend
 step = mt.step_legend(color_pallette, levels, 0, 45, 'Significant Height of Swell and Wind Waves (ft)')
 #create a timestamped geojson object
@@ -157,6 +189,7 @@ wavemap.save('NOAA_GFS_wave_model_data_vis_'+region+'.html')
 region = regions_list[4]
 
 gfs_url = mt.gfswave_region_url(present_date, runtime, region)
+
 ds = xr.open_dataset(gfs_url)
 
 sw_dir = ds.dirpwsfc[:,::8,::8]
@@ -169,11 +202,11 @@ lon_max = max(sw_dir.coords['lon'].values)
 
 print(lat_min, lat_max, lon_min, lon_max)
 
-features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.16, levels=levels, color_pallette=color_pallette, central_lon=0)
+features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.25, levels=levels, color_pallette=color_pallette, central_lon=0)
 
 #intitate the map
 print('Generating Map...')
-wavemap = folium.Map(location=[32, -117], zoom_start=7, min_zoom = 2, worldCopyJump = True)
+wavemap = folium.Map(location=[31, -75], zoom_start=6, min_zoom = 2, worldCopyJump = True)
 #create a legend
 step = mt.step_legend(color_pallette, levels, 0, 45, 'Significant Height of Swell and Wind Waves (ft)')
 #create a timestamped geojson object
@@ -209,7 +242,7 @@ features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.16
 
 #intitate the map
 print('Generating Map...')
-wavemap = folium.Map(location=[32, -117], zoom_start=7, min_zoom = 2, worldCopyJump = True)
+wavemap = folium.Map(location=[19, -155], zoom_start=7, min_zoom = 2, worldCopyJump = True)
 #create a legend
 step = mt.step_legend(color_pallette, levels, 0, 45, 'Significant Height of Swell and Wind Waves (ft)')
 #create a timestamped geojson object
@@ -245,7 +278,7 @@ features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.16
 
 #intitate the map
 print('Generating Map...')
-wavemap = folium.Map(location=[32, -117], zoom_start=7, min_zoom = 2, worldCopyJump = True)
+wavemap = folium.Map(location=[68, 0], zoom_start=7, min_zoom = 2, worldCopyJump = True)
 #create a legend
 step = mt.step_legend(color_pallette, levels, 0, 45, 'Significant Height of Swell and Wind Waves (ft)')
 #create a timestamped geojson object
