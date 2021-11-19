@@ -222,7 +222,7 @@ def iteray(lats, lons):
 
 #Define an arrow generating coordinate function
 def arrow_coordinates(deg_dir, lat, lon, magnitude):
-    rad_dir = deg_dir * (np.pi/180)
+    rad_dir = (-deg_dir + 90) * (np.pi/180) #convert from degrees north true clockwise to conventional degrees
     lat_t = np.sin(rad_dir)*magnitude
     lon_t = np.cos(rad_dir)*magnitude
     head_1_lat_t = np.sin(rad_dir+(np.pi/4))*(magnitude/2)

@@ -85,8 +85,8 @@ region = regions_list[0]
 gfs_url = mt.gfswave_region_url(present_date, runtime, region)
 ds = xr.open_dataset(gfs_url)
 
-sw_dir = ds.dirpwsfc[:,::8,::8]
-sw_ht = ds.htsgwsfc[:, ::2, ::2]
+sw_dir = ds.dirpwsfc[::4,::12,::12]
+sw_ht = ds.htsgwsfc[::4, :, :]
 
 lat_min = min(sw_dir.coords['lat'].values)
 lat_max = max(sw_dir.coords['lat'].values)
@@ -122,7 +122,7 @@ gfs_url = mt.gfswave_region_url(present_date, runtime, region)
 ds = xr.open_dataset(gfs_url)
 
 sw_dir = ds.dirpwsfc[:,::4,::4]
-sw_ht = ds.htsgwsfc[:, :, :]
+sw_ht = ds.htsgwsfc[:,:,:]
 
 lat_min = min(sw_dir.coords['lat'].values)
 lat_max = max(sw_dir.coords['lat'].values)
@@ -131,7 +131,7 @@ lon_max = max(sw_dir.coords['lon'].values)
 
 print(lat_min, lat_max, lon_min, lon_max)
 
-features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.5, levels=levels, color_pallette=color_pallette, central_lon=0)
+features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.16, levels=levels, color_pallette=color_pallette, central_lon=0)
 
 #intitate the map
 print('Generating Map...')
@@ -152,14 +152,15 @@ wavemap.add_child(time_geojson)
 wavemap.save('NOAA_GFS_wave_model_data_vis_'+region+'.html')
 
 
+
 #Export atl:
 region = regions_list[4]
 
 gfs_url = mt.gfswave_region_url(present_date, runtime, region)
 ds = xr.open_dataset(gfs_url)
 
-sw_dir = ds.dirpwsfc[:,::4,::4]
-sw_ht = ds.htsgwsfc[:, :, :]
+sw_dir = ds.dirpwsfc[:,::8,::8]
+sw_ht = ds.htsgwsfc[:, ::2, ::2]
 
 lat_min = min(sw_dir.coords['lat'].values)
 lat_max = max(sw_dir.coords['lat'].values)
@@ -168,7 +169,7 @@ lon_max = max(sw_dir.coords['lon'].values)
 
 print(lat_min, lat_max, lon_min, lon_max)
 
-features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.5, levels=levels, color_pallette=color_pallette, central_lon=0)
+features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.16, levels=levels, color_pallette=color_pallette, central_lon=0)
 
 #intitate the map
 print('Generating Map...')
@@ -204,7 +205,7 @@ lon_max = max(sw_dir.coords['lon'].values)
 
 print(lat_min, lat_max, lon_min, lon_max)
 
-features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.5, levels=levels, color_pallette=color_pallette, central_lon=0)
+features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.16, levels=levels, color_pallette=color_pallette, central_lon=0)
 
 #intitate the map
 print('Generating Map...')
@@ -230,7 +231,7 @@ region = regions_list[6]
 gfs_url = mt.gfswave_region_url(present_date, runtime, region)
 ds = xr.open_dataset(gfs_url)
 
-sw_dir = ds.dirpwsfc[:,::4,::4]
+sw_dir = ds.dirpwsfc[:,:,:]
 sw_ht = ds.htsgwsfc[:, :, :]
 
 lat_min = min(sw_dir.coords['lat'].values)
@@ -240,7 +241,7 @@ lon_max = max(sw_dir.coords['lon'].values)
 
 print(lat_min, lat_max, lon_min, lon_max)
 
-features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.5, levels=levels, color_pallette=color_pallette, central_lon=0)
+features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.16, levels=levels, color_pallette=color_pallette, central_lon=0)
 
 #intitate the map
 print('Generating Map...')
