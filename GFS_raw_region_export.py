@@ -38,6 +38,25 @@ def swell_data_geojson_features(sw_dir_da, sw_ht_da, feet, arrow_size, levels, c
         features.extend(mt.arrow_timestamp_features(lon_lat, dirpwsfc.sel(time = t), arrow_size, t))
     return features
 
+def swell_data_geojson_features2(sw_ht_da, feet, levels, color_pallette, central_lon):
+    #process the height data.
+    htsgwsfc = mt.convert_unix(sw_ht_da, 'time')
+    if feet == True:
+        htsgwsfc = mt.convert_units(htsgwsfc, 3.2808399)
+    else:
+        pass
+    htsgwsfc = mt.convert_360_180_glo(htsgwsfc)
+    
+    #get a list of lats and lons to format for geojson of arrows.
+    times = htsgwsfc.coords['time'].values
+    
+    #generate the geojson for the map by combining arrows and contour polygons
+    features = []
+    for t in times:
+        t = int(t)
+        features.append(mt.geojson_from_netcdf(htsgwsfc, levels, color_pallette, central_lon, t))
+    return features
+
 #define style functions for any bounding boxes.
 style_funct = lambda x: {'fillColor': '#042069', 
                             'color':'#042069', 
@@ -79,42 +98,38 @@ runtime = mt.present_runtime_calc()[1]
 levels = [0,1,2,3,4,5,6,8,10,12,15,20,25,30,35,40,45]
 color_pallette = 'Spectral_r'
 
-#Export glo25:
-region = regions_list[0]
+glo_times = {'01': [0, 15], '02': [16, 31],'03': [32, 47], '04': [48, 63]
+             ,'05': [64, 79], '06': [80, 95],'07': [96, 111],'08': [112, 127],}
 
-gfs_url = mt.gfswave_region_url(present_date, runtime, region)
-ds = xr.open_dataset(gfs_url)
+#===========================================================================
+   
+for key in glo_times.keys():
 
-sw_dir = ds.dirpwsfc[:56:4,::16,::16]
-sw_ht = ds.htsgwsfc[:56:4, :, :]
-
-lat_min = min(sw_dir.coords['lat'].values)
-lat_max = max(sw_dir.coords['lat'].values)
-lon_min = min(sw_dir.coords['lon'].values)
-lon_max = max(sw_dir.coords['lon'].values)
-
-print(lat_min, lat_max, lon_min, lon_max)
-
-features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.5, levels=levels, color_pallette=color_pallette, central_lon=0)
-
-#intitate the map
-print('Generating Map...')
-wavemap = folium.Map(location=[0, 0], zoom_start=4, min_zoom = 2, worldCopyJump = True)
-#create a legend
-step = mt.step_legend(color_pallette, levels, 0, 45, 'Significant Height of Swell and Wind Waves (ft)')
-#create a timestamped geojson object
-time_geojson = plugins.TimestampedGeoJson({'type': 'FeatureCollection','features': features}, period='PT12H', transition_time = 750, time_slider_drag_update = True, duration = 'PT11H', auto_play=False, add_last_point = False)
-
-#socal_bbox = folium.features.GeoJson(data = mt.geojson_box(-120.5, -116.5, 31.5, 34.0, "<p><a href='NOAA_GFS_wave_model_data_vis_glo25_1.html'>Southern California</a></p>"), zoom_on_click =False, highlight_function=highlight_funct, style_function = style_funct, popup = folium.features.GeoJsonPopup(fields = ['popup'], labels = False))
-
-wavemap.add_child(step)
-wavemap.add_child(time_geojson)
-#wavemap.add_child(socal_bbox)
-
-
-
-wavemap.save('NOAA_GFS_wave_model_data_vis_'+region+'.html')
-
+#Export glo25, no direction arrows to save space:
+    region = regions_list[0]
+    
+    gfs_url = mt.gfswave_region_url(present_date, runtime, region)
+    ds = xr.open_dataset(gfs_url)
+    
+    sw_ht = ds.htsgwsfc[glo_times[key][0]:glo_times[key][1], :, :]
+    
+    features = swell_data_geojson_features2(sw_ht, feet=True, levels=levels, color_pallette=color_pallette, central_lon=0)
+    
+    #intitate the map
+    print('Generating Map...')
+    wavemap = folium.Map(location=[0, 0], zoom_start=4, min_zoom = 2, worldCopyJump = True)
+    #create a legend
+    step = mt.step_legend(color_pallette, levels, 0, 45, 'Significant Height of Swell and Wind Waves (ft)')
+    #create a timestamped geojson object
+    time_geojson = plugins.TimestampedGeoJson({'type': 'FeatureCollection','features': features}, period='PT3H', transition_time = 750, time_slider_drag_update = True, duration = 'PT2H', auto_play=False, add_last_point = False)
+    
+    #socal_bbox = folium.features.GeoJson(data = mt.geojson_box(-120.5, -116.5, 31.5, 34.0, "<p><a href='NOAA_GFS_wave_model_data_vis_glo25_1.html'>Southern California</a></p>"), zoom_on_click =False, highlight_function=highlight_funct, style_function = style_funct, popup = folium.features.GeoJsonPopup(fields = ['popup'], labels = False))
+    
+    wavemap.add_child(step)
+    wavemap.add_child(time_geojson)
+    #wavemap.add_child(socal_bbox)
+    
+    wavemap.save('NOAA_GFS_wave_model_data_vis_'+str(glo_times[key][0])+'_'+str(glo_times[key][1])+'_'+region+'.html')
 
 # #Export glo25 full_detail:
 # sw_dir = ds.dirpwsfc[:1:,::4,::4]
@@ -163,11 +178,11 @@ lon_max = max(sw_dir.coords['lon'].values)
 
 print(lat_min, lat_max, lon_min, lon_max)
 
-features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.25, levels=levels, color_pallette=color_pallette, central_lon=0)
+features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.16, levels=levels, color_pallette=color_pallette, central_lon=0)
 
 #intitate the map
 print('Generating Map...')
-wavemap = folium.Map(location=[36, -122], zoom_start=6, min_zoom = 2, worldCopyJump = True)
+wavemap = folium.Map(location=[36, -122], zoom_start=5, min_zoom = 2, worldCopyJump = True)
 #create a legend
 step = mt.step_legend(color_pallette, levels, 0, 45, 'Significant Height of Swell and Wind Waves (ft)')
 #create a timestamped geojson object
@@ -206,7 +221,7 @@ features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.25
 
 #intitate the map
 print('Generating Map...')
-wavemap = folium.Map(location=[31, -75], zoom_start=6, min_zoom = 2, worldCopyJump = True)
+wavemap = folium.Map(location=[31, -75], zoom_start=5, min_zoom = 2, worldCopyJump = True)
 #create a legend
 step = mt.step_legend(color_pallette, levels, 0, 45, 'Significant Height of Swell and Wind Waves (ft)')
 #create a timestamped geojson object
@@ -242,7 +257,7 @@ features = swell_data_geojson_features(sw_dir, sw_ht, feet=True, arrow_size=0.16
 
 #intitate the map
 print('Generating Map...')
-wavemap = folium.Map(location=[19, -155], zoom_start=7, min_zoom = 2, worldCopyJump = True)
+wavemap = folium.Map(location=[19, -155], zoom_start=5, min_zoom = 2, worldCopyJump = True)
 #create a legend
 step = mt.step_legend(color_pallette, levels, 0, 45, 'Significant Height of Swell and Wind Waves (ft)')
 #create a timestamped geojson object
